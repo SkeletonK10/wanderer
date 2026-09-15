@@ -2,14 +2,23 @@ use std::fs;
 
 const SAVE_PATH: &str = "./save.txt";
 
+const HELP: &str = "wanderer — 세계를 떠도는 텍스트 어드벤처
+
+사용법: wd <명령어> [인자]
+
+명령어:
+  look        주변을 둘러봅니다
+  go <방향>   그 방향을 통해 이동합니다 (예: wd go door)
+  help        이 도움말을 보여줍니다";
+
 enum CommandParseError {
-    EmptyCommand,
     UnknownCommand(String),
 }
 
 enum Command {
     Go(String),
     Look,
+    Help,
 }
 
 fn main() {
@@ -24,22 +33,23 @@ fn main() {
                 write_save(&next);
             }
             None => {
-                println!("그 방향으로 이동할 수 없습니다.");
+                println!("이동할 수 없습니다.");
             }
         },
         Ok(Command::Look) => println!("{}", describe(&room)),
-        Err(CommandParseError::EmptyCommand) => {
-            println!("명령을 입력해 주세요. (wd go [dir] / wd look)")
+        Ok(Command::Help) => println!("{}", HELP),
+        Err(CommandParseError::UnknownCommand(cmd)) => {
+            println!("알 수 없는 명령입니다: {}\nwd help 를 입력해 보세요.", cmd)
         }
-        Err(CommandParseError::UnknownCommand(cmd)) => println!("알 수 없는 명령입니다: {}", cmd),
     }
 }
 
 fn parse(words: &[&str]) -> Result<Command, CommandParseError> {
     match words {
-        [] => Err(CommandParseError::EmptyCommand),
+        [] => Ok(Command::Help),
         ["go", dir, ..] => Ok(Command::Go(dir.to_string())),
         ["look", ..] => Ok(Command::Look),
+        ["help", ..] => Ok(Command::Help),
         [unknown, ..] => Err(CommandParseError::UnknownCommand(unknown.to_string())),
     }
 }
