@@ -2,12 +2,45 @@ use std::fs;
 
 const SAVE_PATH: &str = "./save.txt";
 
+enum CommandParseError {
+    EmptyCommand,
+    UnknownCommand(String),
+}
+
+enum Command {
+    Go(String),
+    Look,
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let command: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
-    match command.as_slice() {
-        [] => println!("사용법: wd <명령어>"),
-        _ => println!("사용법: wd <명령어>"),
+    let words: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    let save = read_save();
+    let room = save;
+    match parse(words.as_slice()) {
+        Ok(Command::Go(dir)) => match next_room(&room, &dir) {
+            Some(next) => {
+                println!("{}", describe(&next));
+                write_save(&next);
+            }
+            None => {
+                println!("그 방향으로 이동할 수 없습니다.");
+            }
+        },
+        Ok(Command::Look) => println!("{}", describe(&room)),
+        Err(CommandParseError::EmptyCommand) => {
+            println!("명령을 입력해 주세요. (wd go [dir] / wd look)")
+        }
+        Err(CommandParseError::UnknownCommand(cmd)) => println!("알 수 없는 명령입니다: {}", cmd),
+    }
+}
+
+fn parse(words: &[&str]) -> Result<Command, CommandParseError> {
+    match words {
+        [] => Err(CommandParseError::EmptyCommand),
+        ["go", dir, ..] => Ok(Command::Go(dir.to_string())),
+        ["look", ..] => Ok(Command::Look),
+        [unknown, ..] => Err(CommandParseError::UnknownCommand(unknown.to_string())),
     }
 }
 
