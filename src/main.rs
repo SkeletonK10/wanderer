@@ -1,6 +1,8 @@
 use std::fs;
 
-const SAVE_PATH: &str = "./save.txt";
+use serde::{Deserialize, Serialize};
+
+const SAVE_PATH: &str = "./save.json";
 
 const HELP: &str = "wanderer — 세계를 떠도는 텍스트 어드벤처
 
@@ -16,6 +18,11 @@ enum ParseError {
     UnknownCommand(String),
 }
 
+#[derive(Deserialize, Serialize)]
+struct State {
+    room: String,
+}
+
 enum Command {
     Go(String),
     Look,
@@ -25,19 +32,19 @@ enum Command {
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let words: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
-    let save = read_save();
-    let room = save;
+    let mut save = read_save();
     match parse(words.as_slice()) {
-        Ok(Command::Go(dir)) => match next_room(&room, &dir) {
+        Ok(Command::Go(dir)) => match next_room(&save.room, &dir) {
             Some(next) => {
                 println!("{}", describe(&next));
-                write_save(&next);
+                save.room = next;
+                write_save(&save);
             }
             None => {
                 println!("이동할 수 없습니다.");
             }
         },
-        Ok(Command::Look) => println!("{}", describe(&room)),
+        Ok(Command::Look) => println!("{}", describe(&save.room)),
         Ok(Command::Help) => println!("{}", HELP),
         Err(ParseError::UnknownCommand(cmd)) => {
             println!("알 수 없는 명령입니다: {cmd}\nwd help 를 입력해 보세요.")
@@ -60,16 +67,19 @@ fn parse(words: &[&str]) -> Result<Command, ParseError> {
     }
 }
 
-fn read_save() -> String {
-    let default_save = "home";
-    match fs::read_to_string(SAVE_PATH) {
-        Err(_) => default_save.to_string(),
-        Ok(save) => save.trim().to_string(),
+fn read_save() -> State {
+    let default_state = State {
+        room: "home".to_string(),
+    };
+    let read = fs::read_to_string(SAVE_PATH);
+    match read {
+        Ok(s) => serde_json::from_str(s.as_str()).unwrap(),
+        Err(_) => default_state,
     }
 }
 
-fn write_save(save: &str) {
-    fs::write(SAVE_PATH, save).unwrap();
+fn write_save(state: &State) {
+    fs::write(SAVE_PATH, serde_json::to_string_pretty(state).unwrap()).unwrap();
 }
 
 fn describe(room: &str) -> String {
