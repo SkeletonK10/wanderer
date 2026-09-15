@@ -32,27 +32,20 @@ enum Command {
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let words: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
-    let mut save = read_save();
-    match parse(words.as_slice()) {
-        Ok(Command::Go(dir)) => match next_room(&save.room, &dir) {
-            Some(next) => {
-                println!("{}", describe(&next));
-                save.room = next;
-                write_save(&save);
-            }
-            None => {
-                println!("이동할 수 없습니다.");
-            }
-        },
-        Ok(Command::Look) => println!("{}", describe(&save.room)),
-        Ok(Command::Help) => println!("{}", HELP),
+    let state = read_save();
+    let (new_state, message) = match parse(words.as_slice()) {
+        Ok(command) => apply(state, command),
         Err(ParseError::UnknownCommand(cmd)) => {
-            println!("알 수 없는 명령입니다: {cmd}\nwd help 를 입력해 보세요.")
+            println!("알 수 없는 명령입니다: {cmd}\nwd help 를 입력해 보세요.");
+            return;
         }
         Err(ParseError::InvalidUsage(cmd)) => {
-            println!("사용법이 올바르지 않습니다: {cmd}\nwd help 를 입력해 보세요.")
+            println!("사용법이 올바르지 않습니다: {cmd}\nwd help 를 입력해 보세요.");
+            return;
         }
-    }
+    };
+    write_save(&new_state);
+    println!("{message}");
 }
 
 fn parse(words: &[&str]) -> Result<Command, ParseError> {
@@ -67,13 +60,35 @@ fn parse(words: &[&str]) -> Result<Command, ParseError> {
     }
 }
 
+#[must_use]
+fn apply(state: State, command: Command) -> (State, String) {
+    match command {
+        Command::Go(dir) => match next_room(&state.room, &dir) {
+            Some(next) => {
+                let new_state = State {
+                    room: next,
+                    ..state
+                };
+                let message = describe(&new_state.room);
+                (new_state, message)
+            }
+            None => (state, "이동할 수 없습니다!".to_string()),
+        },
+        Command::Look => {
+            let message = describe(&state.room);
+            (state, message)
+        }
+        Command::Help => (state, HELP.to_string()),
+    }
+}
+
 fn read_save() -> State {
     let default_state = State {
         room: "home".to_string(),
     };
     let read = fs::read_to_string(SAVE_PATH);
     match read {
-        Ok(s) => serde_json::from_str(s.as_str()).unwrap(),
+        Ok(s) => serde_json::from_str(&s).unwrap(),
         Err(_) => default_state,
     }
 }
