@@ -11,7 +11,8 @@ const HELP: &str = "wanderer — 세계를 떠도는 텍스트 어드벤처
   go <방향>   그 방향을 통해 이동합니다 (예: wd go door)
   help        이 도움말을 보여줍니다";
 
-enum CommandParseError {
+enum ParseError {
+    InvalidUsage(&'static str),
     UnknownCommand(String),
 }
 
@@ -38,19 +39,24 @@ fn main() {
         },
         Ok(Command::Look) => println!("{}", describe(&room)),
         Ok(Command::Help) => println!("{}", HELP),
-        Err(CommandParseError::UnknownCommand(cmd)) => {
-            println!("알 수 없는 명령입니다: {}\nwd help 를 입력해 보세요.", cmd)
+        Err(ParseError::UnknownCommand(cmd)) => {
+            println!("알 수 없는 명령입니다: {cmd}\nwd help 를 입력해 보세요.")
+        }
+        Err(ParseError::InvalidUsage(cmd)) => {
+            println!("사용법이 올바르지 않습니다: {cmd}\nwd help 를 입력해 보세요.")
         }
     }
 }
 
-fn parse(words: &[&str]) -> Result<Command, CommandParseError> {
+fn parse(words: &[&str]) -> Result<Command, ParseError> {
     match words {
         [] => Ok(Command::Help),
-        ["go", dir, ..] => Ok(Command::Go(dir.to_string())),
-        ["look", ..] => Ok(Command::Look),
+        ["go", dir] => Ok(Command::Go(dir.to_string())),
+        ["go", ..] => Err(ParseError::InvalidUsage("go")),
+        ["look"] => Ok(Command::Look),
+        ["look", ..] => Err(ParseError::InvalidUsage("look")),
         ["help", ..] => Ok(Command::Help),
-        [unknown, ..] => Err(CommandParseError::UnknownCommand(unknown.to_string())),
+        [unknown, ..] => Err(ParseError::UnknownCommand(unknown.to_string())),
     }
 }
 
