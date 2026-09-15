@@ -3,11 +3,11 @@ use std::fs;
 const SAVE_PATH: &str = "./save.txt";
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
-    match &args[1..] {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let command: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+    match command.as_slice() {
         [] => println!("사용법: wd <명령어>"),
-        [cmd] => println!("명령: {}", cmd),
-        [cmd, rest @ ..] => println!("명령: {}, 인자: {:?}", cmd, rest),
+        _ => println!("사용법: wd <명령어>"),
     }
 }
 
