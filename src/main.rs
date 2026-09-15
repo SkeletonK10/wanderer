@@ -1,5 +1,7 @@
 use std::fs;
 
+const SAVE_PATH: &str = "./save.txt";
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     match &args[1..] {
@@ -10,12 +12,15 @@ fn main() {
 }
 
 fn read_save() -> String {
-    let path = "./save.txt";
     let default_save = "home";
-    match fs::read_to_string(path) {
+    match fs::read_to_string(SAVE_PATH) {
         Err(_) => default_save.to_string(),
         Ok(save) => save.trim().to_string(),
     }
+}
+
+fn write_save(save: &str) {
+    fs::write(SAVE_PATH, save).unwrap();
 }
 
 fn describe(room: &str) -> String {
