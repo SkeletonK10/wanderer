@@ -1,16 +1,38 @@
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+const WORLD_TOML: &str = include_str!("../worlds/fantasy.toml");
+
 pub const DEFAULT_ROOM: &str = "home";
 
-pub fn describe(room: &str) -> String {
-    match room {
-        "home" => "내 집!".to_string(),
-        "street" => "시끌벅적한 길.".to_string(),
-        _ => "아무것도 보이지 않는다. (세이브 파일 오류)".to_string(),
+#[derive(Deserialize, Serialize)]
+pub struct Room {
+    description: String,
+    exits: HashMap<String, String>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct World {
+    rooms: HashMap<String, Room>,
+}
+
+pub fn load() -> World {
+    match toml::from_str::<World>(WORLD_TOML) {
+        Ok(world) => world,
+        Err(e) => panic!("world.toml 파싱 실패:\n{e}"),
     }
 }
 
-pub fn next_room(room: &str, dir: &str) -> Option<String> {
-    match (room, dir) {
-        ("home", "door") => Some("street".to_string()),
-        _ => None,
+impl World {
+    pub fn describe(&self, room_id: &str) -> String {
+        match self.rooms.get(room_id) {
+            Some(room) => room.description.clone(),
+            None => "아무것도 보이지 않는다.".to_string(),
+        }
+    }
+
+    pub fn next_room(&self, room_id: &str, dir: &str) -> Option<String> {
+        let room = self.rooms.get(room_id)?;
+        room.exits.get(dir).cloned()
     }
 }

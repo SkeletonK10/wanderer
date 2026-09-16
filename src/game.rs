@@ -31,21 +31,21 @@ impl Default for State {
 }
 
 #[must_use]
-pub fn apply(state: State, command: Command) -> (State, String) {
+pub fn apply(world: &world::World, state: State, command: Command) -> (State, String) {
     match command {
-        Command::Go(dir) => match world::next_room(&state.room, &dir) {
+        Command::Go(dir) => match world.next_room(&state.room, &dir) {
             Some(next) => {
                 let new_state = State {
                     room: next,
                     ..state
                 };
-                let message = world::describe(&new_state.room);
+                let message = world.describe(&new_state.room);
                 (new_state, message)
             }
             None => (state, "이동할 수 없습니다!".to_string()),
         },
         Command::Look => {
-            let message = world::describe(&state.room);
+            let message = world.describe(&state.room);
             (state, message)
         }
         Command::Help => (state, HELP.to_string()),

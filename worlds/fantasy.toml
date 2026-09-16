@@ -1,0 +1,50 @@
+# 첫 세계 — 중세 판타지. description은 직접 채우세요.
+
+[rooms.home]
+description = "내 집!"
+exits = { door = "street" }
+
+[rooms.street]
+description = "시끌벅적한 거리."
+[rooms.street.exits]
+home = "home"
+market = "market"
+chapel = "chapel"
+gate = "gate"
+
+[rooms.market]
+description = "시장"
+exits = { street = "street", alley = "alley" }
+
+[rooms.alley]
+description = "뒷골목"
+exits = { market = "market" }
+
+[rooms.chapel]
+description = "예배당"
+exits = { street = "street", stairs = "crypt" }
+
+[rooms.crypt]
+description = "납골당"
+exits = { stairs = "chapel" }
+
+[rooms.gate]
+description = "성문"
+exits = { street = "street", road = "road" }
+
+[rooms.road]
+description = "성 밖 길"
+exits = { gate = "gate", path = "forest_edge" }
+
+[rooms.forest_edge]
+description = "숲 어귀"
+exits = { road = "road", ruin = "ruin" }
+
+[rooms.ruin]
+description = "무너진 탑"
+exits = { forest_edge = "forest_edge" }
+
+# 숨은 통로로만 들어가는 방. 아직 아무 데서도 연결 안 됨.
+[rooms.cellar]
+description = "지하실"
+exits = { alley = "alley" }
