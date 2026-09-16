@@ -2,7 +2,7 @@
 
 [rooms.home]
 description = "내 집!"
-exits = { door = "street" }
+exits = { street = "street" }
 
 [rooms.street]
 description = "시끌벅적한 거리."
