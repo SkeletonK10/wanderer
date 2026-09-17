@@ -14,6 +14,8 @@ const HELP: &str = "wanderer — 세계를 떠도는 텍스트 어드벤처
   help        이 도움말을 보여줍니다.
   quit        이 게임을 종료합니다.";
 
+const SEPARATOR: &str = "-----------------------------------------------------------------";
+
 fn main() -> ExitCode {
     let world = world::load();
     let mut state = match save::read_save() {
@@ -43,17 +45,17 @@ fn main() -> ExitCode {
             Ok(Input::Empty) => continue,
             Ok(Input::Quit) => break,
             Ok(Input::Help) => {
-                println!("{HELP}");
+                show(HELP);
                 continue;
             }
             Ok(Input::Game(command)) => command,
             Err(e) => {
-                eprintln!("{e}");
+                show(&e.to_string());
                 continue;
             }
         };
         let (new_state, message) = game::apply(&world, state, command);
-        println!("{message}");
+        show(&message);
         if let Err(e) = save::write_save(&new_state) {
             eprintln!("wd: {e}");
             return ExitCode::FAILURE;
@@ -62,4 +64,8 @@ fn main() -> ExitCode {
     }
 
     ExitCode::SUCCESS
+}
+
+fn show(text: &str) {
+    println!("\n{SEPARATOR}\n{text}\n{SEPARATOR}\n");
 }

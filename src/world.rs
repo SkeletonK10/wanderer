@@ -1,11 +1,10 @@
+use crate::SEPARATOR;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap};
 
 const WORLD_TOML: &str = include_str!("../worlds/fantasy.toml");
 
 pub const DEFAULT_ROOM: &str = "home";
-
-pub const SEPERATOR: &str = "----------------------------------------------";
 
 #[derive(Deserialize, Serialize)]
 pub struct Room {
@@ -36,7 +35,7 @@ impl World {
                     .map(|s| format!("- {s}"))
                     .collect::<Vec<_>>()
                     .join("\n");
-                format!("{SEPERATOR}\n{desc}\n{SEPERATOR}\n출구 목록:\n{exit_str}\n{SEPERATOR}\n")
+                format!("{desc}\n{SEPARATOR}\n출구 목록:\n{exit_str}")
             }
             None => "아무것도 보이지 않는다.".to_string(),
         }

@@ -41,5 +41,3 @@ Rust로 만드는 텍스트 RPG입니다.
 - 월드 데이터(방, 아이템, 적 등)는 `worlds/*.toml`에 두고 `include_str!`로 임베드
 - 세이브는 JSON. 플레이어 상태만 저장하고 월드 정의는 넣지 않음
 - 게임 규칙(`game::apply`)은 파일도 출력도 건드리지 않는 순수 함수로 유지. IO는 `main`과 `save`에서
-- 에러는 `Result`로 돌려보내고, `main`에서 stderr에 `wd: ` 접두사로 출력한 뒤
-  `ExitCode::FAILURE`로 종료
