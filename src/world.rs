@@ -1,14 +1,16 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 const WORLD_TOML: &str = include_str!("../worlds/fantasy.toml");
 
 pub const DEFAULT_ROOM: &str = "home";
 
+pub const SEPERATOR: &str = "----------------------------------------------";
+
 #[derive(Deserialize, Serialize)]
 pub struct Room {
     description: String,
-    exits: HashMap<String, String>,
+    exits: BTreeMap<String, String>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -26,7 +28,16 @@ pub fn load() -> World {
 impl World {
     pub fn describe(&self, room_id: &str) -> String {
         match self.rooms.get(room_id) {
-            Some(room) => room.description.clone(),
+            Some(room) => {
+                let desc = &room.description;
+                let exit_str = room
+                    .exits
+                    .keys()
+                    .map(|s| format!("- {s}"))
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                format!("{desc}\n{SEPERATOR}\n출구 목록:\n{exit_str}")
+            }
             None => "아무것도 보이지 않는다.".to_string(),
         }
     }
