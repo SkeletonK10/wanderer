@@ -36,7 +36,7 @@ impl World {
                     .map(|s| format!("- {s}"))
                     .collect::<Vec<_>>()
                     .join("\n");
-                format!("{desc}\n{SEPERATOR}\n출구 목록:\n{exit_str}")
+                format!("{SEPERATOR}\n{desc}\n{SEPERATOR}\n출구 목록:\n{exit_str}\n{SEPERATOR}\n")
             }
             None => "아무것도 보이지 않는다.".to_string(),
         }

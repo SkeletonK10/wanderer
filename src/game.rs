@@ -2,15 +2,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::world;
 
-const HELP: &str = "wanderer — 세계를 떠도는 텍스트 어드벤처
-
-사용법: wd <명령어> [인자]
-
-명령어:
-  look        주변을 둘러봅니다
-  go <방향>   그 방향을 통해 이동합니다 (예: wd go door)
-  help        이 도움말을 보여줍니다";
-
 #[derive(Deserialize, Serialize)]
 pub struct State {
     room: String,
@@ -19,7 +10,6 @@ pub struct State {
 pub enum Command {
     Go(String),
     Look,
-    Help,
 }
 
 impl Default for State {
@@ -48,6 +38,5 @@ pub fn apply(world: &world::World, state: State, command: Command) -> (State, St
             let message = world.describe(&state.room);
             (state, message)
         }
-        Command::Help => (state, HELP.to_string()),
     }
 }
