@@ -10,7 +10,7 @@ const HELP: &str = "wanderer — 세계를 떠도는 텍스트 어드벤처
 
 명령어:
   look        주변을 둘러봅니다.
-  go <방향>    그 방향을 통해 이동합니다. (예: go street)
+  go <출구>    그 방향을 통해 이동합니다. (예: go street)
   help        이 도움말을 보여줍니다.
   quit        이 게임을 종료합니다.";
 

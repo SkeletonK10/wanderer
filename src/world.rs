@@ -1,30 +1,49 @@
 use crate::SEPARATOR;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::collections::{BTreeMap, HashMap};
 
 const WORLD_TOML: &str = include_str!("../worlds/fantasy.toml");
 
 pub const DEFAULT_ROOM: &str = "home";
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize)]
 pub struct Room {
     description: String,
     exits: BTreeMap<String, String>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize)]
 pub struct World {
     rooms: HashMap<String, Room>,
 }
 
+pub(crate) fn from_toml(src: &str) -> Result<World, toml::de::Error> {
+    toml::from_str(src)
+}
+
 pub fn load() -> World {
-    match toml::from_str::<World>(WORLD_TOML) {
-        Ok(world) => world,
-        Err(e) => panic!("world.toml 파싱 실패:\n{e}"),
+    match from_toml(WORLD_TOML) {
+        Ok(world) => {
+            world.validate();
+            world
+        }
+        Err(e) => panic!("{e}"),
     }
 }
 
 impl World {
+    fn validate(&self) {
+        if !self.rooms.contains_key(DEFAULT_ROOM) {
+            panic!("No default room")
+        }
+        for (id, room) in &self.rooms {
+            for (exit_id, exit) in &room.exits {
+                if !(&self.rooms.contains_key(exit)) {
+                    panic!("exit to nowhere : {id} to {exit_id}")
+                }
+            }
+        }
+    }
     pub fn describe(&self, room_id: &str) -> String {
         match self.rooms.get(room_id) {
             Some(room) => {
@@ -41,8 +60,8 @@ impl World {
         }
     }
 
-    pub fn next_room(&self, room_id: &str, dir: &str) -> Option<String> {
+    pub fn next_room(&self, room_id: &str, dir: &str) -> Option<&str> {
         let room = self.rooms.get(room_id)?;
-        room.exits.get(dir).cloned()
+        room.exits.get(dir).map(String::as_str)
     }
 }

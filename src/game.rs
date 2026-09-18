@@ -26,7 +26,7 @@ pub fn apply(world: &world::World, state: State, command: Command) -> (State, St
         Command::Go(dir) => match world.next_room(&state.room, &dir) {
             Some(next) => {
                 let new_state = State {
-                    room: next,
+                    room: next.to_string(),
                     ..state
                 };
                 let message = world.describe(&new_state.room);

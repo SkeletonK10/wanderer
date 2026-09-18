@@ -28,8 +28,8 @@ impl std::fmt::Display for ParseError {
 pub fn parse(words: &[&str]) -> Result<Input, ParseError> {
     match words {
         [] => Ok(Input::Empty),
-        ["go", dir] => Ok(Input::Game(Command::Go(dir.to_string()))),
-        ["go", ..] => Err(ParseError::InvalidUsage("go")),
+        ["go"] => Err(ParseError::InvalidUsage("go")),
+        ["go", rest @ ..] => Ok(Input::Game(Command::Go(rest.join(" ")))),
         ["look"] => Ok(Input::Game(Command::Look)),
         ["look", ..] => Err(ParseError::InvalidUsage("look")),
         ["help", ..] => Ok(Input::Help),
